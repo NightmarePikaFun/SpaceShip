@@ -30,8 +30,8 @@ public class Planet : MonoBehaviour
     void FixedUpdate()
     {
         RotateAround();
-        if(canMove)
-            Move();
+        /*if(canMove)
+            Move();*/
     }
 
     void RotateAround()
@@ -61,5 +61,20 @@ public class Planet : MonoBehaviour
     public float GetMass()
     {
         return mass;
+    }
+    bool canAddForce = true;
+    public void AddForce(Vector3 forceV,float force)
+    {
+        if (canAddForce)
+        {
+            canAddForce = false;
+            rb.velocity += (new Vector3(force * Time.deltaTime, 0, 0));
+        }
+        rb.AddForce(forceV*Time.deltaTime);
+    }
+
+    public float GetRangeToSun()
+    {
+        return rangeToSun;
     }
 }

@@ -18,7 +18,8 @@ public class Ship : MonoBehaviour
     private Text fuelText, impulseSpeedText, impulseText, speedText;
     #endregion
 
-
+    [SerializeField]
+    private GameObject observer;
     [SerializeField]
     private float impulse;
     [SerializeField, Range(0,1.0f)]
@@ -65,7 +66,18 @@ public class Ship : MonoBehaviour
         speedZ = -impulseSpeed * Mathf.Sin(angle);
         //shipBody.AddForce(new Vector3(-speedX,0,speedZ ));
         shipBody.AddForce(new Vector3(0, 0, -impulseSpeed));
-        prevPos = curPos;    
+        Gravity();
+         prevPos = curPos;    
+    }
+
+
+    void Gravity()
+    {
+        Vector3[] forces = observer.GetComponent<GravityModel>().GetGraviteForseAllPlanet(this.gameObject);
+        for (int i = 0; i < forces.Length; i++)
+        {
+            shipBody.AddForce(forces[i]);
+        }
     }
 
     void DisplayStats()
