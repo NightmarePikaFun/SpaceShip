@@ -10,12 +10,18 @@ public class GravityModel : MonoBehaviour
     private GameObject sun;
     [SerializeField]
     private float GravityConst; //6.67408f * Mathf.Pow(10, -11);
+    [SerializeField]
+    private float multiplayer, planetSpeedMultiplayer;
 
 
     // Start is called before the first frame update
     void Start()
     {
         planets = GameObject.FindGameObjectsWithTag("Planet");
+        for(int i = 0; i< planets.Length;i++)
+        {
+            planets[i].GetComponent<Planet>().SetSpeedMultiplayer(multiplayer);
+        }
         Debug.Log(planets.Length);
     }
 
@@ -38,7 +44,7 @@ public class GravityModel : MonoBehaviour
             {
                 Vector3 distance = (sun.transform.position-planets[i].transform.position).normalized;
                 forces[i] = GravityConst * (planets[i].GetComponent<Planet>().GetMass() * sun.GetComponent<Planet>().GetMass()) / Mathf.Pow(planets[i].GetComponent<Planet>().GetRangeToSun(), 2);
-                float sunSpeed = GravityConst * sun.GetComponent<Planet>().GetMass() / (planets[i].GetComponent<Planet>().GetRangeToSun()*5);
+                float sunSpeed = GravityConst * sun.GetComponent<Planet>().GetMass() / (planets[i].GetComponent<Planet>().GetRangeToSun()* planetSpeedMultiplayer);
                 planets[i].GetComponent<Planet>().AddForce(distance*forces[i], sunSpeed);
             }
             

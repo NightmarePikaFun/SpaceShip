@@ -13,13 +13,14 @@ public class Planet : MonoBehaviour
     [SerializeField]
     private float rotateAroundCoef;
     [SerializeField]
-    private float speed;
+    private float speedRotate, speed;
     [SerializeField]
     private float offsetSin, offsetCos;
     
 
     private Rigidbody rb;
     private float currentPos;
+    bool canAddForce = true;
     // Start is called before the first frame update
     void Start()
     {
@@ -37,7 +38,7 @@ public class Planet : MonoBehaviour
     void RotateAround()
     {
         //rb.AddTorque(new Vector3(0,impulseSpeed*364,0));
-        this.transform.Rotate( new Vector3(0, speed* rotateAroundCoef, 0));
+        this.transform.Rotate( new Vector3(0, speedRotate* rotateAroundCoef, 0));
     }
     
     void Move()
@@ -47,7 +48,7 @@ public class Planet : MonoBehaviour
         route.z += Mathf.Cos(currentPos) * rangeToSun * offsetCos;
         transform.position = route;
 
-        currentPos += Mathf.PI * speed * Time.deltaTime;
+        currentPos += Mathf.PI * speedRotate * Time.deltaTime;
     }
 
 
@@ -62,13 +63,13 @@ public class Planet : MonoBehaviour
     {
         return mass;
     }
-    bool canAddForce = true;
+
     public void AddForce(Vector3 forceV,float force)
     {
         if (canAddForce)
         {
             canAddForce = false;
-            rb.velocity += (new Vector3(force * Time.deltaTime, 0, 0));
+            rb.velocity += (new Vector3(force * Time.deltaTime*speed, 0, 0));
         }
         rb.AddForce(forceV*Time.deltaTime);
     }
@@ -76,5 +77,11 @@ public class Planet : MonoBehaviour
     public float GetRangeToSun()
     {
         return rangeToSun;
+    }
+
+    public void SetSpeedMultiplayer(float multiplayer)
+    {
+        rangeToSun *= multiplayer;
+        //Add multiplayer to range;
     }
 }
