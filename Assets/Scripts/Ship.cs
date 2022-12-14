@@ -11,6 +11,11 @@ public class Ship : MonoBehaviour
         CalcFullShipMass();
         shipBody = this.GetComponent<Rigidbody>();
         curPos = prevPos = transform.position;
+        Debug.Log("Move helper: " + moveHelper.transform.position);
+        impulseGrow *= spaceShipMass*50;
+        fuelMass *= spaceShipMass;
+        fuelLostSpeed *= spaceShipMass*spaceShipMass* spaceShipMass;
+        //shipBody.AddForce(new Vector3(750 * Time.deltaTime , 0, 0));
     }
 
     #region TestText
@@ -19,7 +24,7 @@ public class Ship : MonoBehaviour
     #endregion
 
     [SerializeField]
-    private GameObject observer;
+    private GameObject observer, moveHelper;
     [SerializeField]
     private float impulse;
     [SerializeField, Range(0,1.0f)]
@@ -55,29 +60,27 @@ public class Ship : MonoBehaviour
         }
         if(Input.GetKey(KeyCode.Q))
         {
-            shipBody.AddTorque(new Vector3(0,-1,0));
+            this.transform.Rotate(new Vector3(0,-1,0));
         }
         if(Input.GetKey(KeyCode.E))
         {
-            shipBody.AddTorque(new Vector3(0, 1, 0));
+            this.transform.Rotate(new Vector3(0, 1, 0));
+            //shipBody.AddTorque(new Vector3(0, 1, 0));
         }
         float speedX, speedZ, angle = this.transform.rotation.y;
         speedX = -impulseSpeed * Mathf.Cos(angle);
         speedZ = -impulseSpeed * Mathf.Sin(angle);
         //shipBody.AddForce(new Vector3(-speedX,0,speedZ ));
-        shipBody.AddForce(new Vector3(0, 0, -impulseSpeed));
+        shipBody.AddForce(DistanceMove()*(-impulseSpeed));
         Gravity();
-         prevPos = curPos;    
+        prevPos = curPos;    
     }
 
 
     void Gravity()
     {
-        Vector3[] forces = observer.GetComponent<GravityModel>().GetGraviteForseAllPlanet(this.gameObject);
-        for (int i = 0; i < forces.Length; i++)
-        {
-            shipBody.AddForce(forces[i]);
-        }
+        Vector3 forces = observer.GetComponent<GravityModel>().GetNearbyPlanetGravityForces(this.gameObject);
+        shipBody.AddForce(forces);
     }
 
     void DisplayStats()
@@ -97,8 +100,9 @@ public class Ship : MonoBehaviour
 
     void SpeedCalc()
     {
+        Debug.Log(Mathf.Log(fullShipMass / spaceShipMass));
         impulseSpeed = impulse * Mathf.Log(fullShipMass / spaceShipMass);
-        if (impulse != 0)
+        if (impulse != 0 && fuelMass>0)
         {
             fuelMass = fuelMass - fuelLostSpeed;  
         }
@@ -115,16 +119,18 @@ public class Ship : MonoBehaviour
         return new float[] {curPos.x-prevPos.x, curPos.z-prevPos.z };
     }
 
-    float GiveForceFromOtherPlanet()
-    {
-        return 0;
-    }
-
     public float GetMass()
     {
         return fullShipMass;
     }
 
+
+    public Vector3 DistanceMove()
+    {
+        Vector3 retVec = (moveHelper.transform.position - this.transform.position).normalized;
+        retVec.y = 0;
+        return retVec;
+    }
     //TODO: Рассчитать скорость коробля относительно сил притяжения планет.
 
     //TODO: Нормальный поворот и управление, а то это говно какое-то

@@ -5,6 +5,8 @@ using UnityEngine;
 public class GravityModel : MonoBehaviour
 {
 
+    public float shipMulitpayerSpeed;
+
     GameObject[] planets;
     [SerializeField]
     private GameObject sun;
@@ -12,7 +14,6 @@ public class GravityModel : MonoBehaviour
     private float GravityConst; //6.67408f * Mathf.Pow(10, -11);
     [SerializeField]
     private float multiplayer, planetSpeedMultiplayer;
-
 
     // Start is called before the first frame update
     void Start()
@@ -51,21 +52,39 @@ public class GravityModel : MonoBehaviour
         }
     }
 
-    public Vector3[] GetGraviteForseAllPlanet(GameObject spaceShip)
+    //гравитация для корабля
+    public Vector3 GetNearbyPlanetGravityForces(GameObject spaceShip)
     {
-        Vector3[] forcesToPlanet = new Vector3[planets.Length];
-        float[] forces = new float[planets.Length];
-        for(int i = 0; i <forces.Length;i++)
+        Vector3 forcesToPlanet;
+        float forces;
+        float[] distance = new float[planets.Length];
+        int id = 0;
+        float minDistance = float.MaxValue;
+        for(int i = 0; i < distance.Length; i++)
         {
-            forces[i] = GravityConst * (planets[i].GetComponent<Planet>().GetMass()*spaceShip.GetComponent<Ship>().GetMass())/Mathf.Pow(GetRadius(planets[i],spaceShip),2);
-            forcesToPlanet[i] = (planets[i].transform.position-spaceShip.transform.position).normalized * forces[i];
+            distance[i] = GetRadius(planets[i], spaceShip);
+            if(minDistance>distance[i])
+            {
+                minDistance = distance[i];
+                id = i;
+            }
         }
+        forces = shipMulitpayerSpeed * (planets[id].GetComponent<Planet>().GetMass()* spaceShip.GetComponent<Ship>().GetMass())/(distance[id]);
+        //Debug.Log(forces);
+        forcesToPlanet = (planets[id].transform.position - spaceShip.transform.position).normalized * forces;
+        /*for(int i = 0; i <forces.Length;i++)
+        {
+            forces[i] = GravityConst * (planets[i].GetComponent<Planet>().GetMass()*spaceShip.GetComponent<Ship>().GetMass())/distance[i];
+            forcesToPlanet[i] = (planets[i].transform.position-spaceShip.transform.position).normalized * forces[i];
+            Debug.Log("Force "+i+": "+forces[i]);
+        } */
         //TODO: Дописать направление гравитационных сил для каждой планеты
+        //Debug.Log("Force to ship: " + forcesToPlanet.Length);
         return forcesToPlanet;
     }
 
     private float GetRadius(GameObject planet, GameObject spaceShip)
     {
-        return Vector3.Distance(planet.transform.position, spaceShip.transform.position);
+        return Vector3.Distance(planet.transform.position, spaceShip.transform.position)*1f;
     }
 }
